@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { NFTCard } from './Card';
 import { IdolCard } from '../types';
@@ -140,7 +141,7 @@ export function BattleScene({ playerCard, opponentCard, onRetreat }: BattleScene
   );
 }
 
-function BattleCommandButton({ icon, label, color }: { icon: React.ReactNode; label: string; color: 'pink' | 'cyan' | 'blue' | 'purple' }) {
+function BattleCommandButton({ icon, label, color }: { icon: ReactNode; label: string; color: 'pink' | 'cyan' | 'blue' | 'purple' }) {
   
   const colors = {
     pink: 'from-[var(--color-neon-pink)] to-rose-600 shadow-[0_0_20px_rgba(255,42,133,0.4)]',

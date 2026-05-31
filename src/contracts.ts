@@ -50,4 +50,4 @@ export const IDOL_ARENA_NFT_ABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   }
-];
+] as const;

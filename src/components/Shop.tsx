@@ -35,7 +35,7 @@ export function Shop() {
           1, // Level
           "ipfs://example"
         ]
-      });
+      } as any);
       alert("Mint successful!");
     } catch(e: any) {
       alert("Mint failed: " + e.message);

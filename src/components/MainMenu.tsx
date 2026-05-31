@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Play, Grid, ShoppingCart, Calendar, Layers, ShieldAlert, ZapIcon } from 'lucide-react';
 import { ViewState } from '../types';
@@ -9,7 +10,7 @@ interface MenuProps {
 
 export function MainMenu({ currentView, onViewChange }: MenuProps) {
   
-  const menuItems: { id: ViewState; label: string; icon: React.ReactNode; color: string }[] = [
+  const menuItems: { id: ViewState; label: string; icon: ReactNode; color: string }[] = [
     { id: 'Battle', label: 'Play Battle', icon: <Play size={24} />, color: 'from-[var(--color-neon-pink)] to-rose-600' },
     { id: 'Collection', label: 'My Collection', icon: <Grid size={24} />, color: 'from-cyan-400 to-blue-600' },
     { id: 'Events', label: 'Events', icon: <Calendar size={24} />, color: 'from-[var(--color-neon-purple)] to-purple-800' },
