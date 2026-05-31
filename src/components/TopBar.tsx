@@ -1,13 +1,14 @@
 import { Wallet, Bell, Settings, Zap, LogOut } from 'lucide-react';
-import { useAccount, useConnect, useDisconnect, useChainId } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useReadContract } from 'wagmi';
 import { ViewState } from '../types';
+import { IDOL_ARENA_NFT_ADDRESS, IDOL_ARENA_NFT_ABI } from '../contracts';
 
 interface TopBarProps {
   playerLevel: number;
   expS: number;
   expMax: number;
-  starTokens: number; // premium currency
-  creditTokens: number; // standard game currency
+  starTokens: number;
+  creditTokens: number;
   onViewChange?: (view: ViewState) => void;
 }
 
@@ -16,16 +17,36 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, on
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
 
+  const { data: balanceData } = useBalance({ 
+    address, 
+    chainId: 91342,
+    query: { enabled: !!address }
+  });
+
+  const { data: nftBalance } = useReadContract({
+    address: IDOL_ARENA_NFT_ADDRESS as `0x${string}`,
+    abi: IDOL_ARENA_NFT_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+
   const handleConnect = () => {
-    const metaMaskConnector = connectors.find(c => c.name === 'MetaMask') ?? connectors[0];
-    if (metaMaskConnector) {
-      connect({ connector: metaMaskConnector });
+    const rabbyConnector = connectors.find(c => c.name.toLowerCase().includes('rabby'));
+    if (rabbyConnector) {
+      connect({ connector: rabbyConnector });
+    } else {
+      connect({ connector: connectors[0] });
     }
   };
 
+  const currentGiwa = balanceData ? (Number(balanceData.value) / 1e18) : 0;
+  const showCredit = isConnected ? currentGiwa.toLocaleString(undefined, { maximumFractionDigits: 2 }) : creditTokens.toLocaleString();
+  const showStars = isConnected && nftBalance !== undefined ? Number(nftBalance).toLocaleString() : starTokens.toLocaleString();
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-6 bg-black/40 backdrop-blur-xl border-b border-white/5">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 cursor-pointer" onClick={() => onViewChange?.('MainMenu')}>
         <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-600 to-cyan-400 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(219,39,119,0.5)]">
           <span className="font-black text-xl italic text-white leading-none">IA</span>
         </div>
@@ -35,20 +56,20 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, on
       <div className="flex items-center gap-6">
         <div className="hidden md:flex items-center gap-4 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
           <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">C-Tokens</span>
-            <span className="text-sm font-mono font-bold text-gray-200">{creditTokens.toLocaleString()} C</span>
+             <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Giwa</span>
+             <span className="text-sm font-mono font-bold text-cyan-400">{showCredit} $</span>
           </div>
           <div className="w-px h-6 bg-white/20"></div>
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">S-Tokens</span>
-            <span className="text-sm font-mono font-bold text-yellow-400">{starTokens.toLocaleString()} <Zap size={12} className="inline ml-1 mb-0.5" /></span>
+          <div className="flex flex-col items-end cursor-pointer hover:bg-white/5 rounded px-2" onClick={() => onViewChange?.('Collection')}>
+             <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Cards</span>
+             <span className="text-sm font-mono font-bold text-pink-400">{showStars} <Zap size={12} className="inline ml-1 mb-0.5" /></span>
           </div>
           <div className="w-px h-6 bg-white/20"></div>
           <div className="flex flex-col items-end">
             <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Wallet</span>
             {isConnected && address ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-mono text-cyan-400">
+                <span className="text-sm font-mono text-cyan-400 cursor-pointer hover:text-white" onClick={() => onViewChange?.('Wallet')}>
                   {address.slice(0, 6)}...{address.slice(-4)}
                 </span>
                 <button onClick={() => disconnect()} className="text-red-400 hover:text-red-500 mt-0.5">
@@ -56,8 +77,12 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, on
                 </button>
               </div>
             ) : (
-               <button onClick={handleConnect} className="text-[10px] uppercase font-bold tracking-widest text-pink-500 hover:text-pink-400 hover:underline mt-0.5">
-                  Connect
+               <button 
+                 onClick={handleConnect}
+                 className="flex items-center gap-2 px-5 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full text-[10px] sm:text-xs font-bold hover:brightness-110 transition-all text-white uppercase tracking-widest"
+               >
+                 <Wallet size={14} />
+                 Connect Rabby
                </button>
             )}
           </div>
@@ -70,7 +95,7 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, on
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-full border-2 border-pink-500 p-0.5 ml-2 cursor-pointer" onClick={() => onViewChange?.('Profile')}>
+        <div className="w-10 h-10 rounded-full border-2 border-pink-500 p-0.5 ml-2 cursor-pointer hover:scale-110 transition-transform" onClick={() => onViewChange?.('Profile')}>
           <div className="w-full h-full bg-gray-800 rounded-full overflow-hidden flex items-center justify-center">
             <span className="font-bold text-xs">U</span>
           </div>
@@ -84,7 +109,7 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, on
             <Wallet size={16} />
           </button>
         ) : (
-          <button onClick={handleConnect} className="w-10 h-10 bg-pink-500/20 rounded-full flex items-center justify-center border border-pink-500/50 text-pink-500">
+          <button onClick={handleConnect} className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center border border-transparent text-white hover:brightness-110">
             <Wallet size={16} />
           </button>
         )}

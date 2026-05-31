@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Settings as SettingsIcon, Monitor, Volume2, Globe, ExternalLink } from 'lucide-react';
 import { useAccount, useChainId, useSwitchChain, useConnect } from 'wagmi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { config } from '../wagmi';
 
 export function Settings() {
@@ -11,14 +11,29 @@ export function Settings() {
   const { connect } = useConnect();
   const targetChainId = 91342;
 
-  const [particlesEnabled, setParticles] = useState(true);
-  const [sfxEnabled, setSfx] = useState(true);
-  const [musicVolume, setMusicVolume] = useState(50);
+  const [particlesEnabled, setParticles] = useState(() => {
+    return localStorage.getItem('particlesEnabled') !== 'false';
+  });
+  const [sfxEnabled, setSfx] = useState(() => {
+    return localStorage.getItem('sfxEnabled') !== 'false';
+  });
+  const [musicVolume, setMusicVolume] = useState(() => {
+    return parseInt(localStorage.getItem('musicVolume') || '50');
+  });
+
+  useEffect(() => {
+    localStorage.setItem('particlesEnabled', particlesEnabled.toString());
+    localStorage.setItem('sfxEnabled', sfxEnabled.toString());
+    localStorage.setItem('musicVolume', musicVolume.toString());
+  }, [particlesEnabled, sfxEnabled, musicVolume]);
 
   const handleConnect = () => {
-    const metaMaskConnector = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
-    if (metaMaskConnector) {
-      connect({ connector: metaMaskConnector });
+    const rabbyConnector = config.connectors.find(c => c.name.toLowerCase().includes('rabby'));
+    if (rabbyConnector) {
+      connect({ connector: rabbyConnector });
+    } else {
+      const fallback = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
+      if (fallback) connect({ connector: fallback });
     }
   };
 
@@ -50,7 +65,7 @@ export function Settings() {
               </div>
               {!isConnected && (
                 <button onClick={handleConnect} className="bg-pink-500 text-white text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
-                  Connect
+                  Connect Rabby
                 </button>
               )}
             </div>

@@ -17,9 +17,12 @@ export function Profile() {
   });
 
   const handleConnect = () => {
-    const metaMaskConnector = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
-    if (metaMaskConnector) {
-      connect({ connector: metaMaskConnector });
+    const rabbyConnector = config.connectors.find(c => c.name.toLowerCase().includes('rabby'));
+    if (rabbyConnector) {
+      connect({ connector: rabbyConnector });
+    } else {
+      const fallback = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
+      if (fallback) connect({ connector: fallback });
     }
   };
 
@@ -63,7 +66,7 @@ export function Profile() {
              </div>
            ) : (
              <button onClick={handleConnect} className="mb-8 mt-2 text-xs uppercase font-bold tracking-widest text-pink-500 bg-pink-500/10 px-4 py-2 rounded-full hover:bg-pink-500/20 transition-colors">
-               Connect Wallet
+               Connect Rabby
              </button>
            )}
 

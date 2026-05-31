@@ -1,5 +1,5 @@
 import { createConfig, http } from 'wagmi';
-import { metaMask, walletConnect } from 'wagmi/connectors';
+import { metaMask, walletConnect, injected } from 'wagmi/connectors';
 
 export const giwaSepolia = {
   id: 91342,
@@ -17,6 +17,7 @@ export const giwaSepolia = {
 export const config = createConfig({
   chains: [giwaSepolia as any],
   connectors: [
+    injected({ target: 'rabby' }),
     metaMask({
       dappMetadata: {
         name: 'Idol Arena',

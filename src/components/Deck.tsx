@@ -8,7 +8,13 @@ import { useState } from 'react';
 
 export function Deck() {
   const { address, isConnected } = useAccount();
-  const [deck, setDeck] = useState<IdolCard[]>([]);
+  const [deck, setDeck] = useState<IdolCard[]>(() => {
+    try {
+      const saved = localStorage.getItem('playerDeck');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return [];
+  });
 
   // 1. Get balance
   const { data: balance, isLoading: isBalanceLoading } = useReadContract({
@@ -80,8 +86,8 @@ export function Deck() {
 
   const handleSaveDeck = () => {
     if (deck.length > 0) {
+      localStorage.setItem('playerDeck', JSON.stringify(deck));
       alert("Deck saved successfully!");
-      // Logic to save deck would go here
     }
   };
 

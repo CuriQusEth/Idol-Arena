@@ -40,9 +40,12 @@ export function WalletView() {
   });
 
   const handleConnect = () => {
-    const metaMaskConnector = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
-    if (metaMaskConnector) {
-      connect({ connector: metaMaskConnector });
+    const rabbyConnector = config.connectors.find(c => c.name.toLowerCase().includes('rabby'));
+    if (rabbyConnector) {
+      connect({ connector: rabbyConnector });
+    } else {
+      const fallback = config.connectors.find(c => c.name === 'MetaMask') ?? config.connectors[0];
+      if (fallback) connect({ connector: fallback });
     }
   };
 
@@ -75,7 +78,7 @@ export function WalletView() {
                onClick={handleConnect}
                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black uppercase tracking-widest px-8 py-4 rounded-full shadow-[0_0_20px_rgba(219,39,119,0.4)] hover:opacity-90 transition-opacity"
              >
-               Connect Wallet
+               Connect Rabby
              </button>
           </div>
         ) : (
