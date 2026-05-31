@@ -20,4 +20,5 @@ export interface IdolCard {
   maxLevel: number;
 }
 
-export type ViewState = 'MainMenu' | 'Collection' | 'Battle' | 'Shop' | 'Events';
+export type ViewState = 'MainMenu' | 'Collection' | 'Battle' | 'Shop' | 'Events' | 'Deck' | 'Wallet' | 'Settings' | 'Profile';
+

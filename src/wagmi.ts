@@ -1,5 +1,5 @@
 import { createConfig, http } from 'wagmi';
-import { metaMask } from 'wagmi/connectors';
+import { metaMask, walletConnect } from 'wagmi/connectors';
 
 export const giwaSepolia = {
   id: 91342,
@@ -22,6 +22,9 @@ export const config = createConfig({
         name: 'Idol Arena',
         url: 'https://idolarena.gg',
       },
+    }),
+    walletConnect({
+      projectId: 'f36f7f706a5807add395701e67c824c0', // Placeholder project ID
     }),
   ],
   transports: {

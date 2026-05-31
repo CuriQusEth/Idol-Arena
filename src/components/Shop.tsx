@@ -1,10 +1,14 @@
 import { motion } from 'motion/react';
 import { Package, Zap, Sparkles } from 'lucide-react';
-import { useReadContract, useWriteContract, useAccount } from 'wagmi';
+import { useReadContract, useWriteContract, useAccount, useChainId, useWaitForTransactionReceipt } from 'wagmi';
+import { useState } from 'react';
 import { IDOL_ARENA_NFT_ADDRESS, IDOL_ARENA_NFT_ABI } from '../contracts';
 
 export function Shop() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const GIWA_CHAIN_ID = 91342;
+  
   const { data: totalSupply } = useReadContract({
     address: IDOL_ARENA_NFT_ADDRESS as any,
     abi: IDOL_ARENA_NFT_ABI,
@@ -17,13 +21,23 @@ export function Shop() {
     functionName: 'MAX_SUPPLY',
   });
 
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending } = useWriteContract();
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
 
-  const handleMint = async () => {
-    if (!address) return alert("Please connect wallet first");
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const handleMint = async (packId: number) => {
+    if (!isConnected || !address) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+    if (chainId !== GIWA_CHAIN_ID) {
+      alert("Please switch to GIWA Sepolia network (Chain ID: 91342).");
+      return;
+    }
     try {
-      await writeContractAsync({
-        address: IDOL_ARENA_NFT_ADDRESS as any,
+      const hash = await writeContractAsync({
+        address: IDOL_ARENA_NFT_ADDRESS as `0x${string}`,
         abi: IDOL_ARENA_NFT_ABI,
         functionName: 'mintIdolCard',
         args: [
@@ -33,12 +47,13 @@ export function Shop() {
           0, // Common
           "Light",
           1, // Level
-          "ipfs://example"
+          "ipfs://idol-arena/metadata/1"
         ]
       } as any);
-      alert("Mint successful!");
+      setTxHash(hash);
     } catch(e: any) {
-      alert("Mint failed: " + e.message);
+      console.error("Mint failed:", e);
+      alert("Transaction failed: " + (e.shortMessage ?? e.message));
     }
   };
 
@@ -80,7 +95,7 @@ export function Shop() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-6xl mx-auto h-full flex flex-col p-8 z-10"
     >
-      <div className="mb-12 flex justify-between items-end">
+      <div className="mb-8 flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none text-glow-cyan text-white mb-2">Card Shop</h2>
           <p className="text-gray-400 max-w-xl text-sm leading-relaxed">Spend your earned Credits or premium Star Tokens to acquire new Idols and build your ultimate Arena Deck.</p>
@@ -92,6 +107,13 @@ export function Shop() {
            </span>
         </div>
       </div>
+
+      {isSuccess && txHash && (
+        <div className="mb-8 bg-green-500/20 border border-green-500/50 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+          <span className="text-green-400 font-bold text-sm">Mint Successful! You've obtained a new Idol.</span>
+          <a href={`https://sepolia-explorer.giwa.io/tx/${txHash}`} target="_blank" rel="noreferrer" className="text-xs font-mono text-white underline hover:text-green-300">View on Giwa Explorer</a>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {packs.map((pack) => (
@@ -118,17 +140,26 @@ export function Shop() {
                <p className="text-xs text-gray-300 font-mono mb-8 opacity-80 min-h-[40px]">{pack.desc}</p>
                
                <button 
-                  onClick={handleMint}
+                  onClick={() => handleMint(pack.id)}
                   className="mt-auto group bg-white/10 hover:bg-white/20 border border-white/20 rounded-full py-4 px-6 flex items-center justify-center gap-2 transition-all"
+                  disabled={isPending || isConfirming}
                >
-                  <span className="text-xs uppercase font-bold tracking-widest">Buy for</span>
-                  <span className={`text-xl font-black ${pack.currency === 'S' ? 'text-yellow-400' : 'text-white'}`}>
-                    {pack.price.toLocaleString()}
-                  </span>
-                  {pack.currency === 'S' ? (
-                     <Zap size={16} className="text-yellow-400" />
+                  {isPending ? (
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">Awaiting Approval...</span>
+                  ) : isConfirming ? (
+                    <span className="text-xs font-bold text-yellow-400 uppercase tracking-widest">Confirming...</span>
                   ) : (
-                     <span className="font-mono font-bold text-gray-400 text-sm">C</span>
+                    <>
+                      <span className="text-xs uppercase font-bold tracking-widest">Buy for</span>
+                      <span className={`text-xl font-black ${pack.currency === 'S' ? 'text-yellow-400' : 'text-white'}`}>
+                        {pack.price.toLocaleString()}
+                      </span>
+                      {pack.currency === 'S' ? (
+                         <Zap size={16} className="text-yellow-400" />
+                      ) : (
+                         <span className="font-mono font-bold text-gray-400 text-sm">C</span>
+                      )}
+                    </>
                   )}
                </button>
             </div>

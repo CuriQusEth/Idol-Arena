@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { Play, Grid, ShoppingCart, Calendar, Layers, ShieldAlert, ZapIcon } from 'lucide-react';
+import { Play, Grid, ShoppingCart, Calendar, Layers, ShieldAlert, ZapIcon, Wallet, Settings, User } from 'lucide-react';
 import { ViewState } from '../types';
 
 interface MenuProps {
@@ -14,8 +14,11 @@ export function MainMenu({ currentView, onViewChange }: MenuProps) {
     { id: 'Battle', label: 'Play Battle', icon: <Play size={24} />, color: 'from-[var(--color-neon-pink)] to-rose-600' },
     { id: 'Collection', label: 'My Collection', icon: <Grid size={24} />, color: 'from-cyan-400 to-blue-600' },
     { id: 'Events', label: 'Events', icon: <Calendar size={24} />, color: 'from-[var(--color-neon-purple)] to-purple-800' },
-    { id: 'MainMenu', label: 'My Deck', icon: <Layers size={24} />, color: 'from-amber-400 to-orange-600' },
+    { id: 'Deck', label: 'My Deck', icon: <Layers size={24} />, color: 'from-amber-400 to-orange-600' },
     { id: 'Shop', label: 'Shop', icon: <ShoppingCart size={24} />, color: 'from-emerald-400 to-teal-600' },
+    { id: 'Wallet', label: 'Wallet', icon: <Wallet size={24} />, color: 'from-green-400 to-emerald-600' },
+    { id: 'Settings', label: 'Settings', icon: <Settings size={24} />, color: 'from-gray-400 to-gray-600' },
+    { id: 'Profile', label: 'Profile', icon: <User size={24} />, color: 'from-yellow-400 to-orange-500' },
   ];
 
   return (

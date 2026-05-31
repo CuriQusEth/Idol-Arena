@@ -1,6 +1,6 @@
 import { Wallet, Bell, Settings, Zap, LogOut } from 'lucide-react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { config } from '../wagmi';
+import { useAccount, useConnect, useDisconnect, useChainId } from 'wagmi';
+import { ViewState } from '../types';
 
 interface TopBarProps {
   playerLevel: number;
@@ -8,16 +8,21 @@ interface TopBarProps {
   expMax: number;
   starTokens: number; // premium currency
   creditTokens: number; // standard game currency
+  onViewChange?: (view: ViewState) => void;
 }
 
-export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens }: TopBarProps) {
+export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens, onViewChange }: TopBarProps) {
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
 
   const handleConnect = () => {
-    connect({ connector: config.connectors[0] });
+    const metaMaskConnector = connectors.find(c => c.name === 'MetaMask') ?? connectors[0];
+    if (metaMaskConnector) {
+      connect({ connector: metaMaskConnector });
+    }
   };
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-6 bg-black/40 backdrop-blur-xl border-b border-white/5">
       <div className="flex items-center gap-4">
@@ -65,13 +70,24 @@ export function TopBar({ playerLevel, expS, expMax, starTokens, creditTokens }: 
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-full border-2 border-pink-500 p-0.5 ml-2">
-          <div className="w-full h-full bg-gray-800 rounded-full overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-b from-purple-400 to-purple-800 pt-2 flex items-start justify-center">
-               <Settings size={16} className="text-white/50" />
-            </div>
+        <div className="w-10 h-10 rounded-full border-2 border-pink-500 p-0.5 ml-2 cursor-pointer" onClick={() => onViewChange?.('Profile')}>
+          <div className="w-full h-full bg-gray-800 rounded-full overflow-hidden flex items-center justify-center">
+            <span className="font-bold text-xs">U</span>
           </div>
         </div>
+      </div>
+      
+      {/* Mobile Wallet Connect */}
+      <div className="md:hidden flex items-center ml-4">
+        {isConnected && address ? (
+          <button onClick={() => disconnect()} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/10 text-cyan-400">
+            <Wallet size={16} />
+          </button>
+        ) : (
+          <button onClick={handleConnect} className="w-10 h-10 bg-pink-500/20 rounded-full flex items-center justify-center border border-pink-500/50 text-pink-500">
+            <Wallet size={16} />
+          </button>
+        )}
       </div>
     </header>
   );

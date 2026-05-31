@@ -8,6 +8,10 @@ import { BattleScene } from './components/BattleScene';
 import { Collection } from './components/Collection';
 import { Shop } from './components/Shop';
 import { Events } from './components/Events';
+import { Deck } from './components/Deck';
+import { WalletView } from './components/WalletView';
+import { Settings } from './components/Settings';
+import { Profile } from './components/Profile';
 
 // Mock Data Configuration
 const LUNA_CARD: IdolCard = {
@@ -111,6 +115,7 @@ export default function App() {
         expMax={3000} 
         creditTokens={1240500} 
         starTokens={5800} 
+        onViewChange={setCurrentView}
       />
       
       <main className="relative z-10 w-full h-full pt-16 flex">
@@ -138,6 +143,11 @@ export default function App() {
               {currentView === 'Collection' && <Collection key="collection" cards={[LUNA_CARD, OPPONENT_CARD]} />}
               {currentView === 'Shop' && <Shop key="shop" />}
               {currentView === 'Events' && <Events key="events" />}
+              
+              {currentView === 'Deck' && <Deck key="deck" />}
+              {currentView === 'Wallet' && <WalletView key="wallet" />}
+              {currentView === 'Settings' && <Settings key="settings" />}
+              {currentView === 'Profile' && <Profile key="profile" />}
             </AnimatePresence>
 
         </div>
